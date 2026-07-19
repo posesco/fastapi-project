@@ -1,5 +1,5 @@
 # ─── Build stage 
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # ─── Dev stage 
-FROM python:3.12-slim AS dev
+FROM python:3.14-slim AS dev
 
 # Prevents .pyc file creation and disables buffering for real-time logs
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -35,7 +35,7 @@ EXPOSE 8000
 CMD ["fastapi", "dev", "src/main.py", "--host", "0.0.0.0", "--port", "8000"]
 
 # ─── Runtime stage ──────────────────────────────────────────────────────────
-FROM python:3.12-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 ARG BUILD_DATE
 ARG GIT_COMMIT
@@ -45,7 +45,7 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.revision="${GIT_COMMIT}" \
       org.opencontainers.image.version="${VERSION}" \
       org.opencontainers.image.title="fastapi-app" \
-      org.opencontainers.image.base.name="python:3.12-slim"
+      org.opencontainers.image.base.name="python:3.14-slim"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
