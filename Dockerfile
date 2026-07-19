@@ -9,8 +9,7 @@ ENV VIRTUAL_ENV="/app/.venv" \
     PATH="/app/.venv/bin:$PATH"
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # ─── Dev stage 
 FROM python:3.14-slim AS dev
@@ -27,6 +26,9 @@ WORKDIR /app
 RUN addgroup --system app && adduser --system --ingroup app --no-create-home app
 
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
+COPY requirements-dev.txt .
+RUN pip install --no-cache-dir -r requirements-dev.txt
+COPY pytest.ini .
 
 USER app
 

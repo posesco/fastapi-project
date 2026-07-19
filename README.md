@@ -18,7 +18,7 @@ The project is intentionally a work in progress. It is useful for experimentatio
 - Isolated pytest resources with fail-closed safety checks.
 - k6 scenarios for the public movie read endpoints.
 
-The current application configuration targets PostgreSQL. Although additional database drivers exist in `requirements.txt`, MariaDB and SQLite are not configured or supported execution paths.
+The current application configuration targets PostgreSQL. MariaDB and SQLite are not configured, declared, or supported execution paths.
 
 ## Quick start with Docker
 
@@ -123,7 +123,7 @@ The example test URLs use `localhost`, so they are suitable for host execution. 
 
 ### Run tests in Docker
 
-The development image includes the dependencies from `requirements.txt`. Use Compose service names instead of `localhost` from inside the container:
+The development image includes dependencies from both production and development locks. Use Compose service names instead of `localhost` from inside the container:
 
 ```bash
 docker compose run --rm \
@@ -133,6 +133,27 @@ docker compose run --rm \
 ```
 
 The credentials above match `.env.example`. Change both URLs if you customized the PostgreSQL or Redis credentials.
+
+## Dependency maintenance
+
+Python 3.14 and pip-tools 7.6.0 define the lock environment. Edit only `requirements.in` and `requirements-dev.in`, then regenerate the generated, fully pinned transitive locks in this order:
+
+```bash
+python -m pip install --upgrade pip-tools==7.6.0
+pip-compile --upgrade --allow-unsafe requirements.in
+pip-compile --upgrade --allow-unsafe requirements-dev.in
+```
+
+Install the exact development environment and validate it:
+
+```bash
+pip-sync requirements.txt requirements-dev.txt
+python -m pip check
+```
+
+Production installs only `requirements.txt` with `python -m pip install -r requirements.txt`. Commit the generated `requirements.txt` and `requirements-dev.txt`, but never edit them by hand. Hashes are intentionally omitted for readability: exact version pins keep installs version-reproducible, but artifact hashes are not verified. `pip freeze` is useful for diagnosing an active environment; it is not the dependency source of truth.
+
+Current compatibility holds are intentionally narrow: FastAPI remains below 0.137 with `fastapi-limiter` 0.1.6 until the limiter 0.2 API is migrated; Passlib 1.7.4 and bcrypt 4.0.1 preserve existing bcrypt hashes; and Typer remains below 0.26 for Safety 3.8.1. Floating infrastructure tags were not guessed, and the unrelated Tempo 3 configuration migration remains out of scope.
 
 ## Architecture
 

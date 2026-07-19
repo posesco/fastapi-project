@@ -16,7 +16,7 @@ async def init_redis(url: str | None = None):
 
 async def close_redis():
     if redis_client:
-        await redis_client.close()
+        await redis_client.aclose()
 
 
 async def is_token_blacklisted(jti: str) -> bool:
